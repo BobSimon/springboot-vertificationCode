@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<!-- 配置mapper,mybatis通过使用mapper实现dao接口 -->
+<mapper namespace="com.dtyunxi.dtplatform.dao.UserDAO">
+
+    <!-- 查找用户，通过id、email、userName、phone -->
+    <select id="findByEmail" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT COUNT(email) FROM user WHERE email = #{email}
+    </select>
+
+    <select id="findByUser" resultType="java.lang.Integer" parameterType="java.lang.String">
+        SELECT COUNT(username) FROM user WHERE username = #{username}
+    </select>
+
+    <!-- 查找用户，通过id、email、userName、phone -->
+    <select id="findByName" resultType="User" parameterType="java.lang.String">
+        SELECT email,username,password FROM USER WHERE username = #{username}
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="addUser" parameterType="com.dtyunxi.dtplatform.domain.User">
+        INSERT INTO user
+        (email,username,password)
+        VALUES
+        (#{email},#{username},#{password})
+    </insert>
+</mapper>
