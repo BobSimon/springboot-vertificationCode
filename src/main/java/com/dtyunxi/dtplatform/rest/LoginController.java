@@ -4,18 +4,16 @@ package com.dtyunxi.dtplatform.rest;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.dtyunxi.dtplatform.dao.UserDAO;
-import com.dtyunxi.dtplatform.domain.User;
+import com.dtyunxi.dtplatform.common.RestResponse;
 import com.dtyunxi.dtplatform.service.IUserService;
-import com.dtyunxi.dtplatform.service.impl.CustomGenericManageableCaptchaService;
 import com.octo.captcha.service.image.ImageCaptchaService;
 
-@Controller
+@RestController
+@RequestMapping("api/v1/user")
 public class LoginController {
 	
 	@Autowired
@@ -23,52 +21,22 @@ public class LoginController {
 
 	@Autowired
 	private ImageCaptchaService imageCaptchaService;
+	
+	@RequestMapping("/login")
+	public RestResponse doAdd(String username, String password, String captcha, HttpServletRequest request) throws Exception {
 
-	@Autowired
-	private CustomGenericManageableCaptchaService customGenericManageableCaptchaService;
-	
-	@Autowired
-	private UserDAO userDAO;
-	
-	@RequestMapping("login")
-	public ModelAndView login(){
-		ModelAndView mv = new ModelAndView("login");
-		return mv;
-	}
-	
-
-	@RequestMapping("register")
-	public ModelAndView register(){
-		ModelAndView mv = new ModelAndView("register");
-		return mv;
-	}
-	
-	@RequestMapping("userAdd")
-	public ModelAndView doAdd(User user, String captcha, HttpServletRequest request) throws Exception {
-
+		RestResponse response = new RestResponse();
 		Boolean isResponseCorrect = imageCaptchaService.validateResponseForID(request.getSession().getId(), captcha);
 		if (isResponseCorrect) {
-			userDAO.addUser(user);
-			customGenericManageableCaptchaService.removeCaptcha(request.getSession().getId());
-			ModelAndView mv = new ModelAndView("personal");
-			return mv;
-		} else {
-			ModelAndView mv = new ModelAndView("register");
-			return mv;
+			if(userService.login(username, password)){
+				return response.success();
+			}else{
+				return response.failure("用户或密码错误1");
+			}
 		}
+		return response.failure("验证码错误！");
 	}
 	
-	@RequestMapping("personal")
-	public ModelAndView index(String username,String password) throws Exception{
-		if(userService.login(username, password)) {
-			ModelAndView mv = new ModelAndView("personal");
-			return mv;
-		}else{
-			ModelAndView mv = new ModelAndView("login");
-			mv.addObject("msg", "用户名或者密码错误");
-			return mv;
-		}
-	}
 	
 	@RequestMapping("/checkEmail")
 	public @ResponseBody int checkEmail(String email) throws Exception {
